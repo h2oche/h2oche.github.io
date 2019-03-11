@@ -106,12 +106,12 @@
 <meta property="og:site_name" content="h2oche의 블로그">
 <meta property="og:description" content="PINTOS 가이드 - project#1project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다. 12345670. alarm clock 시도해보기1. kernel thread 동작 이해하기2. thread scheduling 이해하기3. alarm clock 해결하기4. context switch 이해하기5. synch">
 <meta property="og:locale" content="ko">
-<meta property="og:image" content="https://h2oche.github.io/2019/03/12/pintos-guide-1/thread_lifecycle.png">
-<meta property="og:updated_time" content="2019-03-11T16:24:23.876Z">
+<meta property="og:image" content="https://h2oche.github.io/images/thread_lifecycle.png">
+<meta property="og:updated_time" content="2019-03-11T16:29:44.823Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="pintos-guide-1">
 <meta name="twitter:description" content="PINTOS 가이드 - project#1project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다. 12345670. alarm clock 시도해보기1. kernel thread 동작 이해하기2. thread scheduling 이해하기3. alarm clock 해결하기4. context switch 이해하기5. synch">
-<meta name="twitter:image" content="https://h2oche.github.io/2019/03/12/pintos-guide-1/thread_lifecycle.png">
+<meta name="twitter:image" content="https://h2oche.github.io/images/thread_lifecycle.png">
 
 
 
@@ -340,7 +340,7 @@
                 
               
 
-              <time title="Post created: 2019-03-12 01:23:57 / Updated at: 01:24:23" itemprop="dateCreated datePublished" datetime="2019-03-12T01:23:57+09:00">2019-03-12</time>
+              <time title="Post created: 2019-03-12 01:23:57 / Updated at: 01:29:44" itemprop="dateCreated datePublished" datetime="2019-03-12T01:23:57+09:00">2019-03-12</time>
             
 
             
@@ -449,7 +449,7 @@
 <p>마지막으로 알아둬야 할 것은 idle thread와 main thread는 사실 같은 것이라는 것이다. 이유는 코드를 잘 살펴보면 알 수 있다.</p>
 <h2 id="2-thread-scheduling"><a href="#2-thread-scheduling" class="headerlink" title="2. thread scheduling"></a>2. thread scheduling</h2><p>핀토스에서는 한 개의 kernel thread만이 CPU를 점유할 수 있다. 그렇다면 여러 kernel thread 가 있을 때, 어떤 kernel thread가 CPU를 점유하게 하는게 좋을까? 이에 대한 정책을 thread scheduling 이라고 한다. scheduling은 말 그대로 정책이기 때문에, thread 처럼 메모리 공간을 차지하는 것이 아니다. thread와 관련한 코드 곳곳에 이 정책들이 녹아들어 있다.</p>
 <p>우선 thread의 status부터 알아보자.</p>
-<h3 id="thread-status"><a href="#thread-status" class="headerlink" title="thread status"></a>thread status</h3><p><img src="./thread_lifecycle.png" alt="thread status diagram"></p>
+<h3 id="thread-status"><a href="#thread-status" class="headerlink" title="thread status"></a>thread status</h3><p><img src="/images/thread_lifecycle.png" alt="thread status diagram"></p>
 <p>핀토스에서 kernel thread는 총 4개의 status를 가진다.</p>
 <ul>
 <li>thread_running : 현재 CPU를 점유중인 kernel thread</li>
