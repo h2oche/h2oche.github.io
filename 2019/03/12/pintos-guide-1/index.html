@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="ko">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PINTOS 가이드 - project#1project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다. 12345670. alarm clock 시도해보기1. kernel thread 동작 이해하기2. thread scheduling 이해하기3. alarm clock 해결하기4. context switch 이해하기5. synch">
+<meta name="keywords" content="pintos">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pintos-guide-1">
+<meta property="og:url" content="https://h2oche.github.io/2019/03/12/pintos-guide-1/index.html">
+<meta property="og:site_name" content="h2oche의 블로그">
+<meta property="og:description" content="PINTOS 가이드 - project#1project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다. 12345670. alarm clock 시도해보기1. kernel thread 동작 이해하기2. thread scheduling 이해하기3. alarm clock 해결하기4. context switch 이해하기5. synch">
+<meta property="og:locale" content="ko">
+<meta property="og:image" content="https://h2oche.github.io/2019/03/12/pintos-guide-1/thread_lifecycle.png">
+<meta property="og:updated_time" content="2019-03-11T16:24:23.876Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="pintos-guide-1">
+<meta name="twitter:description" content="PINTOS 가이드 - project#1project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다. 12345670. alarm clock 시도해보기1. kernel thread 동작 이해하기2. thread scheduling 이해하기3. alarm clock 해결하기4. context switch 이해하기5. synch">
+<meta name="twitter:image" content="https://h2oche.github.io/2019/03/12/pintos-guide-1/thread_lifecycle.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://h2oche.github.io/2019/03/12/pintos-guide-1/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>pintos-guide-1 | h2oche의 블로그</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="ko">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">h2oche의 블로그</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">생각과 기억 저장소</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>홈</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>아카이브</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/03/12/pintos-guide-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="h2oche">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="h2oche의 블로그">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">pintos-guide-1
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">작성일</span>
+              
+
+              
+                
+              
+
+              <time title="Post created: 2019-03-12 01:23:57 / Updated at: 01:24:23" itemprop="dateCreated datePublished" datetime="2019-03-12T01:23:57+09:00">2019-03-12</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/pintos/" itemprop="url" rel="index"><span itemprop="name">pintos</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PINTOS-가이드-project-1"><a href="#PINTOS-가이드-project-1" class="headerlink" title="PINTOS 가이드 - project#1"></a>PINTOS 가이드 - project#1</h1><p>project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0. alarm clock 시도해보기</span><br><span class="line">1. kernel thread 동작 이해하기</span><br><span class="line">2. thread scheduling 이해하기</span><br><span class="line">3. alarm clock 해결하기</span><br><span class="line">4. context switch 이해하기</span><br><span class="line">5. synchronization 이해하기</span><br><span class="line">6. priority scheduling 해결하기</span><br></pre></td></tr></table></figure>
+<p>우선 과제를 하기에 앞서 make check 했을 때, pintos가 잘 돌아가는지, 잘 돌아가는 시점이 git에 기록되어 있어 언제든 그 상태로 돌아갈 수 있는지 부터 확인해야 한다. git을 아직 안만들었다면 github에서 repository를 만들고 처음상태 핀토스를 commit 하자. 그리고 과제 중간중간에도 뭔가를 바꿨는데 잘 돌아간다면 항상 commit을 해서 언제든 그 상태로 돌아갈 수 있게 하는 습관을 들이는 것이 좋다. 돌아갈 곳이 있다는 것이 얼마나 좋은 것인지 과제를 하다보면 느끼게 될 것이다.</p>
+<p>또, interrupt와 synchronization에 대한 설명은 핀토스 다큐먼트에 잘 묘사되어 있으니 꼭 appendix에서 해당 주제를 이해해야 한다. 이 것을 이해하게 되면 핀토스가 어떻게 돌아가는 지 이해하는 데에 큰 도움이 된다. 그리고 lib/kernel 에 보면 우리가 자유롭게 사용할 수 있는 유용한 자료구조 및 함수가 구현되어 있다. 특히 list.c, list.h는 앞으로 핀토스 과제를 하며 계속 사용하게 될 자료구조 이므로 사용법을 반드시 익혀야 한다. 주석에 list creation, list iteration 등에 대한 설명이 매우 잘 되있으므로 참고하면 된다.</p>
+<h2 id="0-alarm-clock-시도해보기"><a href="#0-alarm-clock-시도해보기" class="headerlink" title="0. alarm clock 시도해보기"></a>0. alarm clock 시도해보기</h2><p>핀토스 첫번째 과제의 첫번째 task인 alarm clock이다. 본격적인 과제에 앞서 몸풀기 격인 task이다. 다큐먼트에 어쩌고 저쩌고 굉장히 간단한 것처럼 써져있지만, 사실 처음 핀토스를 시작한 입장에서 다큐먼트의 글을 읽으며 “뭔지 대충은 알겠는데, 그래서 뭐하라는거야?” 라는 생각이 들 것이라 생각한다. 문제 상황이 무엇인지 부터 정확히 파악해보자.</p>
+<p>여기서 문제는 devices/timer.c 에 있는 timer_sleep() 함수가 busy-wait 방식으로 구현되어 있다는 것이다. alarm clock의 task는 timer_sleep()이 busy-wait을 하지 않도록 하는 것이다. busy-wait은 의미없는 명령을 실행하며 일정 시점이 지나기를 기다리는 행동을 의미하는데, 지금 구현은 반복문을 돌며, 일정 시간이 지나지 않았다면 thread_yield()를 통해 다음 thread에게 실행 권한을 넘기는 것을 반복한다. 즉, busy-wait으로 구현이 되어있다. 문제에서 요구하는 것은 반복문을 통해 계속 시간을 확인하지 않으면서(while을 없애라는 것이다), ticks 만큼의 시간이 지났을 때 thread가 실행 되도록 하는 것이다. </p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// busy-wait 으로 구현된 timer_sleep()</span></span><br><span class="line"><span class="keyword">while</span> (timer_elapsed (start) &lt; ticks) </span><br><span class="line">    thread_yield ();</span><br></pre></td></tr></table></figure>
+<p>어떻게 해야될까? 우선 이 것을 하려면 핀토스의 kernel thread와 interrupt 동작을 이해해야 한다.</p>
+<h2 id="1-kernel-thread-동작-이해하기"><a href="#1-kernel-thread-동작-이해하기" class="headerlink" title="1. kernel thread 동작 이해하기"></a>1. kernel thread 동작 이해하기</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">요약</span><br><span class="line">1. kernel thread는 하나의 task를 개념화한 것이다.</span><br><span class="line">2. thread_init(), thread_start()를 통해 최초의 kernel thread(=idle,main)가 만들어진다.</span><br></pre></td></tr></table></figure>
+<p>thread.c, thread.h 에 kernel thread 에 대한 모든 코드들이 담겨있다. 그리고 알아둬야 할 것은 핀토스에서 계속 언급되는 thread(=kernel thread)는 우리가 평소에 생각하던 process 안에서 동작하는 thread가 아니라는 것이다. 그 전에 우리가 알고있던 thread는 OS에서 user thread라는 별도의 명칭으로 불린다.</p>
+<h3 id="kernel-thread"><a href="#kernel-thread" class="headerlink" title="kernel_thread()"></a>kernel_thread()</h3><p>kernel thread가 어떤 개념인지 부터 이해해보자. kernel thread의 모든 동작은 thread.c 의 <strong>kernel_thread()</strong> 를 보면 이해할 수 있다. 코드는 굉장히 단순하다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Function used as the basis for a kernel thread. */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">kernel_thread (thread_func *function, <span class="keyword">void</span> *aux) </span><br><span class="line">&#123;</span><br><span class="line">  ASSERT (function != <span class="literal">NULL</span>);</span><br><span class="line">                    </span><br><span class="line">  intr_enable ();       <span class="comment">/* 인터럽트를 끈다 */</span></span><br><span class="line">  function (aux);       <span class="comment">/* 어떤 기능을 하는 함수를 실행한다 */</span></span><br><span class="line">  thread_exit ();       <span class="comment">/* 함수가 끝나면 kernel thread를 종료한다. */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이게 kernel thread 동작의 전부이다. 하나의 kernel thread는 하나의 함수를 실행시키고 이후 종료되는 것이다. 즉, 한 개의 kernel thread는 컴퓨터에서 수행하는 한 개의 task를 개념화한 것이다. 사실 모든 프로그램의 동작은 추상적으로 생각해 봤을 때, 모두 kernel_thread()같이 동작한다. 핀토스에서 그림판과 파워포인트를 쓰는 상황을 생각해 보자.</p>
+<p><strong>그림판 프로그램 실행 과정</strong></p>
+<ol>
+<li>kernel thread 하나를 만든다.</li>
+<li>그림판의 모든 기능을 수행하는 함수를 실행해서, 유저가 원하는 그림을 그려준다.</li>
+<li>유저가 그림판을 끄면, 그림판을 수행한 kernel thread를 없앤다.</li>
+</ol>
+<p><strong>파워포인트 프로그램 실행 과정</strong></p>
+<ol>
+<li>kernel thread 하나를 만든다.</li>
+<li>파워포인트의 모든 기능을 수행하는 함수를 실행해서, 유저의 발표 슬라이드를 만들어준다.</li>
+<li>유저가 파워포인트를 끄면, 파워포인트를 수행한 kernel thread를 없앤다.</li>
+</ol>
+<p>컴퓨터에서 한 번에 kernel thread만 사용하면 얼마나 행복할까? 그러면 이렇게 핀토스 하느라 고생하지 않아도 될텐데.. 이 모든 문제의 원인은 한 개의 컴퓨터에 여러개의 kernel thread가 <strong>동시에</strong> 돌아가야 한다는 것이다. 즉, 파워포인트를 다 쓴 다음에 그림판을 쓰거나, 그림판을 다 쓴 다음에 파워포인트를 쓰는게 아니라 파워포인트와 그림판이 <strong>동시에</strong> 실행되어야 한다는 것이다. </p>
+<p>여러 kernel thread중 어떤 thread가 CPU를 점유할 것인지에 대한 정책을 scheduling 이라고 하고, scheduling을 할 때 각각의 kernel thread가 어떤 state를 가지고 있는지가 중요하다. scheduling을 살펴보기 전에 kernel thread가 어떻게 시작되고 만들어지는지 부터 살펴보자.</p>
+<h3 id="thread-init-init-thread-thread-start-thread-create-idle"><a href="#thread-init-init-thread-thread-start-thread-create-idle" class="headerlink" title="thread_init(), init_thread(), thread_start(), thread_create(), idle()"></a>thread_init(), init_thread(), thread_start(), thread_create(), idle()</h3><p>init.c 에 main을 보면 thread_init(), thread_start(), run_actions() 순으로 실행흐름이 이어지는 것을 확인할 수 있다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">thread_init</span> <span class="params">(<span class="keyword">void</span>)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  ASSERT (intr_get_level () == INTR_OFF);</span><br><span class="line"></span><br><span class="line">  lock_init (&amp;tid_lock);</span><br><span class="line">  list_init (&amp;ready_list);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Set up a thread structure for the running thread. */</span></span><br><span class="line">  initial_thread = running_thread ();</span><br><span class="line">  init_thread (initial_thread, <span class="string">"main"</span>, PRI_DEFAULT);</span><br><span class="line">  initial_thread-&gt;status = THREAD_RUNNING;</span><br><span class="line">  initial_thread-&gt;tid = allocate_tid ();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>thread_init()은 init.c의 main()을 실행하고 있는 현재의 실행흐름을 하나의 kernel thread로 생각하고 초기화 한다. 핀토스에서 만들어지는 최초의 kernel thread 가 여기서 만들어진다. thread.h에 있는 <strong>struct thread</strong> 를 살펴보면 뭔가 kernel thread에 들어가야될 것만 같은 여러 정보들(이름, priority, tid, …)이 있는데, 이 구조체의 값들이 init_thread() 함수를 통해 초기화 된다.</p>
+<p>이후 thread_start()를 보자.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">thread_start</span> <span class="params">(<span class="keyword">void</span>)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">/* Create the idle thread. */</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">semaphore</span> <span class="title">idle_started</span>;</span></span><br><span class="line">  sema_init (&amp;idle_started, <span class="number">0</span>);</span><br><span class="line">  thread_create (<span class="string">"idle"</span>, PRI_MIN, idle, &amp;idle_started);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Start preemptive thread scheduling. */</span></span><br><span class="line">  intr_enable ();</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Wait for the idle thread to initialize idle_thread. */</span></span><br><span class="line">  sema_down (&amp;idle_started);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>이 함수의 역할은 idle thread를 만들고, interrupt를 활성화 시키는 것이다. thread_create() 함수를 통해 idle thread 를 생성하게 된다. idle thread는 말 그대로 아무것도 하지 않는 thread인데, ready queue가 비어있을 때, idle thread가 동작하므로써 CPU가 무조건 하나의 kernel thread를 실행시키고 있는 상태를 유지하게 만들어 준다. idle thread의 동작은 idle() 함수에 정의되어 있다. 더 설명하기 전에 thread_create()의 내용을 정리해보자.</p>
+<ol>
+<li>thread를 위한 memory를 할당한다. 페이지 하나(4KB)가 할당된다.</li>
+<li>init_thread()를 통해 thread 구조체를 초기화 시킨다.</li>
+<li>뭔가 알 수 없는 동작을 한다.</li>
+<li>마지막에 thread_unblock()을 통해 생성한 thread를 ready queue 에 넣는다.</li>
+</ol>
+<p>여기서 알 수 없는 동작은 context switch에 대해 설명할 때 알아볼 것이고, ready queue에 대한 설명 역시 scheduling에서 할 것이다. 대충 thread_create()가 끝나서 새로운 kernel thread가 만들어지면, 바로 실행되는 것이 아니라 실행 대기중인 상태로 된다 정도로 이해하면 될 것 같다.</p>
+<p>다음에 interrupt를 활성화 하게 되는데, 여기서는 interrupt를 활성화 시켜야만 scheduling이 작동할 수 있다는 것 정도만 알고 넘어가자.</p>
+<p>그런데 여기서 처음 등장하는 semaphore는 뭘까? semaphore는 sema_up(), sema_down()이 한 쌍으로 동작한다. 함수이름에서 알 수 있듯이 sema_up(&amp;sema)는 sema의 값을 1 증가시키고, sema_down(&amp;sema)는 sema의 값을 1 감소시킨다. 그런데 만약 sema_down(&amp;sema)를 할 때, sema의 값이 0이라면 실행을 멈추고, sema가 1이 될 때까지 기다린다.</p>
+<p>semaphore가 뭔지까지 이해가 됬으면 thread_start()를 이해할 수 있다.</p>
+<ol>
+<li>thread_create()를 통해 idle thread를 만든다.</li>
+<li>interrupt를 활성화 시켜, idle thread가 CPU를 점유할 수 있게 만들어 준다.</li>
+<li>idle() 함수가 sema_up(&amp;idle_started)를 실행하기 전까지 “main” thread는 sema_down(&amp;idle_started)에 멈춰 있는다.</li>
+<li>idle() 함수가 sema_up(&amp;idle_started)를 실행하면(=모든 실행준비를 마치고 이제 다른 kernel thread를 생성할 준비가 되면) 다음으로 넘어가 run_actions()을 실행한다.</li>
+</ol>
+<p>마지막으로 알아둬야 할 것은 idle thread와 main thread는 사실 같은 것이라는 것이다. 이유는 코드를 잘 살펴보면 알 수 있다.</p>
+<h2 id="2-thread-scheduling"><a href="#2-thread-scheduling" class="headerlink" title="2. thread scheduling"></a>2. thread scheduling</h2><p>핀토스에서는 한 개의 kernel thread만이 CPU를 점유할 수 있다. 그렇다면 여러 kernel thread 가 있을 때, 어떤 kernel thread가 CPU를 점유하게 하는게 좋을까? 이에 대한 정책을 thread scheduling 이라고 한다. scheduling은 말 그대로 정책이기 때문에, thread 처럼 메모리 공간을 차지하는 것이 아니다. thread와 관련한 코드 곳곳에 이 정책들이 녹아들어 있다.</p>
+<p>우선 thread의 status부터 알아보자.</p>
+<h3 id="thread-status"><a href="#thread-status" class="headerlink" title="thread status"></a>thread status</h3><p><img src="./thread_lifecycle.png" alt="thread status diagram"></p>
+<p>핀토스에서 kernel thread는 총 4개의 status를 가진다.</p>
+<ul>
+<li>thread_running : 현재 CPU를 점유중인 kernel thread</li>
+<li>thread_ready : CPU를 점유중이지는 않지만 언제든 실행을 할 준비가 된 kernel thread</li>
+<li>thread_dying : 모든 할 일을 마쳐 죽음을 대기중인(memory에서 사라질) kernel thread</li>
+<li>thread_blocked : 실행준비가 되지 않은, 다시말해 어떤 이벤트가 일어나기를 기다리고 있는 kernel thread</li>
+</ul>
+<p>thread의 status가 어떤 상황에서 바뀌는지 위에 그림에 친절히 나타나있다. 헷갈릴 때 자주 참고하면 좋을 것 같다. 아무튼 여기서 중요한 것은 status가 thread_ready인 모든 kernel thread들이 thread.c에 전역으로 선언된 <strong>ready_list</strong> 에 담기게 된다는 것이다. 아까 계속 언급한 ready queue의 정체가 ready_list 이다.</p>
+<h3 id="scheduling"><a href="#scheduling" class="headerlink" title="scheduling"></a>scheduling</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">요약 : ready_list 에 thread를 어떤 순서로 넣고, 어떤 순서로 뺄 지를 정하는 것이 scheduling이다.</span><br></pre></td></tr></table></figure>
+<p>뭔가 점점 감이 잡힐 것이다. 핀토스에서 scheduling은 ready_list를 어떻게 관리하고, schedule() 함수 안에서 호출되는 next_thread_to_run() 함수에 의해 다음 CPU를 점유할 kernel thread를 정할 때, 어떤 kernel thread를 ready_list에서 꺼낼지에 대한 정책을 말한다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *</span></span><br><span class="line"><span class="class"><span class="title">next_thread_to_run</span> (<span class="title">void</span>) </span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">  <span class="keyword">if</span> (list_empty (&amp;ready_list))</span><br><span class="line">    <span class="keyword">return</span> idle_thread;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    <span class="comment">//ready_list의 맨 앞에서 꺼냄</span></span><br><span class="line">    <span class="keyword">return</span> list_entry (list_pop_front (&amp;ready_list), struct thread, elem);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">thread_unblock (struct thread *t) </span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">enum</span> intr_level old_level;</span><br><span class="line"></span><br><span class="line">  ASSERT (is_thread (t));</span><br><span class="line"></span><br><span class="line">  old_level = intr_disable ();</span><br><span class="line">  ASSERT (t-&gt;status == THREAD_BLOCKED);</span><br><span class="line">  <span class="comment">//ready_list의 맨 뒤에 넣음</span></span><br><span class="line">  list_push_back (&amp;ready_list, &amp;t-&gt;elem);</span><br><span class="line">  t-&gt;status = THREAD_READY;</span><br><span class="line">  intr_set_level (old_level);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>위 코드를 보면 알 수 있듯이, 현재 핀토스의 scheduling은 round-robin 방식으로 만들어져 있다. 즉, 어떤 kernel thread의 status가 thread_ready 변경되어 ready_list로 들어갈 때, 항상 ready_list의 맨 마지막으로 들어가게 되고, next_thread_to_run() 함수에서 다음 실행할 kernel thread를 정할 때, 항상 ready_list의 맨 앞에서 꺼낸다. 만약 ready_list가 비어있을 경우, 맨 처음 생성한 idle thread를 실행한다.</p>
+<p>연습삼아 핀토스의 scheduling 정책을 뒤에서 하게 될 priority scheduling으로 바꾼다고 생각해보자. 크게 생각할 것이 없다. 어떻게 kernel thread를 ready_list에 넣고 뺄 것인지만 생각하면 된다.</p>
+<ol>
+<li>넣을 때 : ready_list가 priority의 내림차순으로 정렬되게 넣음</li>
+<li>뺄 때 : ready_list의 맨 앞에서 꺼냄</li>
+</ol>
+<h3 id="scheduling이-일어나는-시점"><a href="#scheduling이-일어나는-시점" class="headerlink" title="scheduling이 일어나는 시점"></a>scheduling이 일어나는 시점</h3><p>마지막으로 schedule이 언제 일어나게 되는지만 확인하면 scheduling에 대해 거의 모두 이해했다고 할 수 있다. 이걸 확인하려면 언제 schedule() 함수가 불리는지만 보면 된다. scheduling을 한다 == schedule() 함수를 실행한다 로 이해하면 된다. schedule() 함수가 호출되는 시점은 다음과 같다.</p>
+<ol>
+<li>thread_yield() 함수가 호출될 때</li>
+<li>thread_block() 함수가 호출될 때</li>
+<li>thread_exit() 함수가 호출될 때</li>
+</ol>
+<p>즉, 위의 thread status 상태 변화를 나타낸 그림에서 status가 thread_running에서 다른 무엇인가로 바뀔 때, schedule()이 호출된다는 것을 알 수 있다.</p>
+<p>그런데, 만약 현재 실행중인 thread가 thread_yield(), thread_block(), thread_exit()을 실행하지 않는다면, schedule()은 영원히 실행되지 않을까? 답은 당연히 <strong>아니다</strong>이다. 그렇게 되면 안된다. 만약 핀토스가 이렇게 동작한다면 그림판과 파워포인트가 동시에 실행되는 것이 아니라, 그림판을 다 끝낸다음에야 파워포인트를 실행할 수 있게 된다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Timer interrupt handler. */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">timer_interrupt (struct intr_frame *args UNUSED)</span><br><span class="line">&#123;</span><br><span class="line">  ticks++;</span><br><span class="line">  thread_tick ();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">thread_tick (<span class="keyword">void</span>) </span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">thread</span> *<span class="title">t</span> = <span class="title">thread_current</span> ();</span></span><br><span class="line">  <span class="comment">/* Enforce preemption. */</span></span><br><span class="line">  <span class="keyword">if</span> (++thread_ticks &gt;= TIME_SLICE)</span><br><span class="line">    intr_yield_on_return ();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>비밀은 timer_interrupt 에 있다. interrupt가 어떤 것인지는 핀토스 다큐먼트를 참고하면 된다. interrupt가 있어야지만 핀토스가 parallel하게 동작하게 된다. 잘 이해가 안간다면 그냥 kernel thread가 무슨 명령을 실행하고 있던지에 상관없이 시시때때로 매우 짧은 단위시간마다 devices/timer.c 에 있는 timer_interrupt() 함수를 실행시킨다고 생각하면 될 것 같다.</p>
+<p>모든 interrupt는 interrupt.c에 정의되어 있는 intr_handler() 에서부터 출발한다(실제로는 아니지만 그렇다고 생각해도 동작을 이해하는 데는 문제가 없다). intr_handler()에서 timer_interrupt()가 실행되면 thread_tick()도 실행되게 되는데, 이 함수에서는 thread_tick 은 thread_ticks를 1 증가시키고, 만약 이 값이 TIME_SLICE 값보다 크다면 intr_yield_on_return()을 실행하게 되고, yield_on_return = true가 된다. 이후 intr_handler()의 마지막에서 yield_on_return = true 이면 thread_yield()가 실행된다.</p>
+<p>정리하면 </p>
+<ol start="0">
+<li>timer interrupt 발생</li>
+<li>intr_handler() 실행</li>
+<li>timer_interrupt() 실행</li>
+<li>thread_tick() 실행</li>
+<li>thread_ticks가 TIME_SLICE(=4) 이상이면 intr_yield_on_return() 실행해서 yield_on_return = true로 바꿈(thread_ticks 는 schedule() 에서 0으로 초기화 된다. 새로운 kernel thread가 thread_running이 된 지 얼마나 지났는지를 기록하는 전역변수이다)</li>
+<li>intr_handler()의 마지막에서 yield_on_return 가 true이면 thread_yield()</li>
+</ol>
+<p>즉, 4 tick 마다 무조건 thread_yield()가 실행되는 것이다.</p>
+<h2 id="3-alarm-clock-해결하기"><a href="#3-alarm-clock-해결하기" class="headerlink" title="3. alarm clock 해결하기"></a>3. alarm clock 해결하기</h2><p>여기까지 모두 이해했다면 alarm clock 에서 어떤 것을 하라는 지 명확해진다.</p>
+<ol>
+<li>timer_sleep()이 호출되면 어느 시점에 이 thread가 다시 thread_ready가 되야되는지를 <strong>struct thread</strong>의 새로운 필드를 만들어서 저장하고, ready_list와는 별도로 sleep_list를 하나 만들어서 현재 thread를 넣은 다음 현재 thread를 block 시킨다.</li>
+<li>timer_interrupt()가 호출될 때 마다 sleep_list를 보며 깨어날 thread가 있는지 확인하고, 깨어날 시점이 지났다면 해당 thread를 unblock시킨다.</li>
+</ol>
+<p>이렇게 하면 busy-wait을 하지 않는 timer_sleep()을 구현할 수 있다. list_push_back()를 사용해서 구현해도 되지만, list_insert_ordered() 함수를 잘 활용하면 더 잘 구현할 수 있다.</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pintos/" rel="tag"># pintos</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/12/pintos-guide/" rel="next" title="pintos_guide">
+                <i class="fa fa-chevron-left"></i> pintos_guide
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            목차
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            흝어보기
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">h2oche</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">포스트</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">카테고리</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">태그</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PINTOS-가이드-project-1"><span class="nav-number">1.</span> <span class="nav-text">PINTOS 가이드 - project#1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-alarm-clock-시도해보기"><span class="nav-number">1.1.</span> <span class="nav-text">0. alarm clock 시도해보기</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-kernel-thread-동작-이해하기"><span class="nav-number">1.2.</span> <span class="nav-text">1. kernel thread 동작 이해하기</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kernel-thread"><span class="nav-number">1.2.1.</span> <span class="nav-text">kernel_thread()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#thread-init-init-thread-thread-start-thread-create-idle"><span class="nav-number">1.2.2.</span> <span class="nav-text">thread_init(), init_thread(), thread_start(), thread_create(), idle()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-thread-scheduling"><span class="nav-number">1.3.</span> <span class="nav-text">2. thread scheduling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#thread-status"><span class="nav-number">1.3.1.</span> <span class="nav-text">thread status</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scheduling"><span class="nav-number">1.3.2.</span> <span class="nav-text">scheduling</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#scheduling이-일어나는-시점"><span class="nav-number">1.3.3.</span> <span class="nav-text">scheduling이 일어나는 시점</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-alarm-clock-해결하기"><span class="nav-number">1.4.</span> <span class="nav-text">3. alarm clock 해결하기</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">h2oche</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -291,7 +291,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/21/20190121-boj2098/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/21/boj1562/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -311,7 +311,179 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/21/20190121-boj2098/" class="post-title-link" itemprop="url">boj2098</a>
+                <a href="/2019/01/21/boj1562/" class="post-title-link" itemprop="url">boj1562</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">작성일</span>
+              
+
+              
+                
+              
+
+              <time title="Post created: 2019-01-21 19:45:18 / Updated at: 20:15:14" itemprop="dateCreated datePublished" datetime="2019-01-21T19:45:18+09:00">2019-01-21</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/algorithm/" itemprop="url" rel="index"><span itemprop="name">algorithm</span></a></span>
+
+                
+                
+                  , 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/algorithm/boj/" itemprop="url" rel="index"><span itemprop="name">boj</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ul>
+<li>시간복잡도 : O(N)</li>
+<li>점화식 : dp[j][k | MASK(j)] = dp[j+1, j-1][k]</li>
+</ul>
+<p>bitmask와 다이나믹 프로그래밍을 적절히 활용해서 푼 문제이다.<br>dp[i][k]의 의미는 끝자리가 i로 끝나면서 k에 표시된 수들을 사용한 계단수이다.<br>N을 차례대로 늘려가면서 dp를 갱신하면 dp[i][1023]에 i로 끝나면서 모든 자릿수가 포함된 계단수의 갯수를 얻을 수 있다.<br>점화식은 dp[j][k | MASK(j)] = dp[j+1, j-1][k] 이다.</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cmath&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> M 1000000000</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DIGITS 10</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MASK(d) (1 &lt;&lt; (d))</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> N;</span><br><span class="line"><span class="keyword">long</span> <span class="keyword">long</span> dp[DIGITS][<span class="number">1</span> &lt;&lt; DIGITS] = &#123; <span class="number">0</span>, &#125;;</span><br><span class="line"><span class="keyword">long</span> <span class="keyword">long</span> buf[DIGITS][<span class="number">1</span> &lt;&lt; DIGITS] = &#123; <span class="number">0</span>, &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">copy_and_clear</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; DIGITS; i += <span class="number">1</span>)</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; <span class="number">1</span> &lt;&lt; DIGITS; j += <span class="number">1</span>)</span><br><span class="line">			buf[i][j] = dp[i][j], dp[i][j] = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; DIGITS - <span class="number">1</span>; i += <span class="number">1</span>)</span><br><span class="line">		dp[i][MASK(i) | MASK(i + <span class="number">1</span>)]++;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; DIGITS; i += <span class="number">1</span>)</span><br><span class="line">		dp[i][MASK(i) | MASK(i - <span class="number">1</span>)]++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">long</span> <span class="keyword">long</span> <span class="title">get_ans</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">long</span> <span class="keyword">long</span> sum = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; DIGITS; i += <span class="number">1</span>)</span><br><span class="line">		sum = (sum + dp[i][(<span class="number">1</span> &lt;&lt; DIGITS) - <span class="number">1</span>]) % M;</span><br><span class="line">	<span class="keyword">return</span> sum % M;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">	<span class="built_in">cin</span> &gt;&gt; N;</span><br><span class="line">	<span class="keyword">if</span> (N &lt; DIGITS) <span class="built_in">cout</span> &lt;&lt; <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span> &#123;</span><br><span class="line">		init();</span><br><span class="line">		<span class="keyword">long</span> <span class="keyword">long</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; N; i += <span class="number">1</span>) &#123;</span><br><span class="line">			copy_and_clear();</span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; DIGITS - <span class="number">1</span>; j += <span class="number">1</span>) &#123;</span><br><span class="line">				<span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; <span class="number">1</span> &lt;&lt; DIGITS; k += <span class="number">1</span>) &#123;</span><br><span class="line">					dp[j][k | MASK(j)] += buf[j + <span class="number">1</span>][k];</span><br><span class="line">					dp[j][k | MASK(j)] %= M;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">1</span>; j &lt; DIGITS; j += <span class="number">1</span>) &#123;</span><br><span class="line">				<span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; <span class="number">1</span> &lt;&lt; DIGITS; k += <span class="number">1</span>) &#123;</span><br><span class="line">					dp[j][k | MASK(j)] += buf[j - <span class="number">1</span>][k];</span><br><span class="line">					dp[j][k | MASK(j)] %= M;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="built_in">cout</span> &lt;&lt; get_ans();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/21/boj2098/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="h2oche">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="h2oche의 블로그">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/01/21/boj2098/" class="post-title-link" itemprop="url">boj2098</a>
               
             
           </h1>
@@ -462,7 +634,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/21/20190121-boj11062/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/21/boj11062/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -482,7 +654,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/21/20190121-boj11062/" class="post-title-link" itemprop="url">boj11062</a>
+                <a href="/2019/01/21/boj11062/" class="post-title-link" itemprop="url">boj11062</a>
               
             
           </h1>
@@ -660,7 +832,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj2178/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj2178/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -680,7 +852,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj2178/" class="post-title-link" itemprop="url">boj2178</a>
+                <a href="/2019/01/18/boj2178/" class="post-title-link" itemprop="url">boj2178</a>
               
             
           </h1>
@@ -828,7 +1000,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj2293/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj2293/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -848,7 +1020,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj2293/" class="post-title-link" itemprop="url">boj2293</a>
+                <a href="/2019/01/18/boj2293/" class="post-title-link" itemprop="url">boj2293</a>
               
             
           </h1>
@@ -996,7 +1168,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj2042/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj2042/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -1016,7 +1188,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj2042/" class="post-title-link" itemprop="url">boj2042</a>
+                <a href="/2019/01/18/boj2042/" class="post-title-link" itemprop="url">boj2042</a>
               
             
           </h1>
@@ -1165,7 +1337,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj1992/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj1992/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -1185,7 +1357,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj1992/" class="post-title-link" itemprop="url">boj1992</a>
+                <a href="/2019/01/18/boj1992/" class="post-title-link" itemprop="url">boj1992</a>
               
             
           </h1>
@@ -1335,7 +1507,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj1786/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj1786/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -1355,7 +1527,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj1786/" class="post-title-link" itemprop="url">boj1786</a>
+                <a href="/2019/01/18/boj1786/" class="post-title-link" itemprop="url">boj1786</a>
               
             
           </h1>
@@ -1504,7 +1676,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj1647/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj1647/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -1524,7 +1696,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj1647/" class="post-title-link" itemprop="url">boj1647</a>
+                <a href="/2019/01/18/boj1647/" class="post-title-link" itemprop="url">boj1647</a>
               
             
           </h1>
@@ -1673,7 +1845,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj2357/">
+    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/boj2357/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="h2oche">
@@ -1693,7 +1865,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/18/20190118-boj2357/" class="post-title-link" itemprop="url">boj2357</a>
+                <a href="/2019/01/18/boj2357/" class="post-title-link" itemprop="url">boj2357</a>
               
             
           </h1>
@@ -1826,174 +1998,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://h2oche.github.io/2019/01/18/20190118-boj1520/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="h2oche">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="h2oche의 블로그">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/01/18/20190118-boj1520/" class="post-title-link" itemprop="url">boj1520</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">작성일</span>
-              
-
-              
-                
-              
-
-              <time title="Post created: 2019-01-18 00:27:36 / Updated at: 00:30:36" itemprop="dateCreated datePublished" datetime="2019-01-18T00:27:36+09:00">2019-01-18</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/algorithm/" itemprop="url" rel="index"><span itemprop="name">algorithm</span></a></span>
-
-                
-                
-                  , 
-                
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/algorithm/boj/" itemprop="url" rel="index"><span itemprop="name">boj</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>함수를 사용한 dp 로 해결할 수 있었다.<br>처음에 dp를 0으로 초기화 해서 헤맸었다.<br>중간에 길이 막힐 경우 값이 0이 되는데, 이렇게 하면 초기값과 구분이 안되서 경로를 다시 계산하므로 시간초과가 발생한다.<br>dp를 -1로 초기화 하니 해결되었다.</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//https://www.acmicpc.net/problem/1520</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">dp를 0으로 초기화 할 시 문제점</span></span><br><span class="line"><span class="comment">중간에 멈추는 경우 dp 값이 0이 되어야 하는데, 이러면 초기값이랑 구분이 안감</span></span><br><span class="line"><span class="comment">-&gt; 다시계산하므로 시간초과 발생*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;climits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> n, m;</span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt; <span class="built_in">map</span>;</span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt; dp;</span><br><span class="line"><span class="keyword">int</span> dx[] = &#123; <span class="number">0</span>,<span class="number">1</span>,<span class="number">0</span>,<span class="number">-1</span> &#125;;</span><br><span class="line"><span class="keyword">int</span> dy[] = &#123; <span class="number">1</span>,<span class="number">0</span>,<span class="number">-1</span>,<span class="number">0</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_map</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!(y &gt; <span class="number">0</span> &amp;&amp; y &lt;= n &amp;&amp; x &gt; <span class="number">0</span> &amp;&amp; x &lt;= m))</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">map</span>[y][x];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">get_dp</span><span class="params">(<span class="keyword">int</span> x, <span class="keyword">int</span> y)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!(y &gt; <span class="number">0</span> &amp;&amp; y &lt;= n &amp;&amp; x &gt; <span class="number">0</span> &amp;&amp; x &lt;= m))</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (x == <span class="number">1</span> &amp;&amp; y == <span class="number">1</span>) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (dp[y][x] != <span class="number">-1</span>) <span class="keyword">return</span> dp[y][x];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> cum = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i += <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="keyword">int</span> new_x = x + dx[i];</span><br><span class="line">		<span class="keyword">int</span> new_y = y + dy[i];</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span>(<span class="built_in">map</span>[y][x] &lt; get_map(new_x, new_y))</span><br><span class="line">			cum += get_dp(new_x, new_y);</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> dp[y][x] = cum;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span> </span>&#123;</span><br><span class="line">	ios::sync_with_stdio(<span class="literal">false</span>);</span><br><span class="line">	<span class="built_in">cin</span>.tie(<span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* input */</span></span><br><span class="line">	<span class="built_in">cin</span> &gt;&gt; n &gt;&gt; m;</span><br><span class="line">	<span class="built_in">map</span> = <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;(n + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(m + <span class="number">1</span>, INT_MAX));</span><br><span class="line">	dp = <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;(n + <span class="number">1</span>, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(m + <span class="number">1</span>, <span class="number">-1</span>));</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= n; i += <span class="number">1</span>)</span><br><span class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= m; j += <span class="number">1</span>)</span><br><span class="line">			<span class="built_in">cin</span> &gt;&gt; <span class="built_in">map</span>[i][j];</span><br><span class="line"></span><br><span class="line">	<span class="built_in">cout</span> &lt;&lt; get_dp(m,n);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2040,7 +2044,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-count">34</span>
                     <span class="site-state-item-name">포스트</span>
                   </a>
                 </div>
