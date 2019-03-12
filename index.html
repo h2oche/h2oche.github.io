@@ -336,7 +336,7 @@
                 
               
 
-              <time title="Post created: 2019-03-12 01:23:57 / Updated at: 15:45:38" itemprop="dateCreated datePublished" datetime="2019-03-12T01:23:57+09:00">2019-03-12</time>
+              <time title="Post created: 2019-03-12 01:23:57 / Updated at: 21:58:12" itemprop="dateCreated datePublished" datetime="2019-03-12T01:23:57+09:00">2019-03-12</time>
             
 
             
@@ -396,9 +396,10 @@
         
           
             <h1 id="PINTOS-가이드-project-1"><a href="#PINTOS-가이드-project-1" class="headerlink" title="PINTOS 가이드 - project#1"></a>PINTOS 가이드 - project#1</h1><p>project#1 해결에 도움이 될만한 내용들을 작성하려 노력했다. 구성은 대충 아래와 같다.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1. alarm clock 시도해보기</span><br><span class="line">2. kernel thread 동작 이해하기</span><br><span class="line">3. thread scheduling 이해하기</span><br><span class="line">4. alarm clock 해결하기</span><br><span class="line">5. context switch 이해하기</span><br><span class="line">6. synchronization 이해하기</span><br><span class="line">7. priority scheduling 해결하기</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1. alarm clock 시도해보기</span><br><span class="line">2. kernel thread 동작 이해하기</span><br><span class="line">3. thread scheduling 이해하기</span><br><span class="line">4. alarm clock 해결하기</span><br><span class="line">5. context switch 이해하기</span><br><span class="line">6. priority scheduling 해결하기</span><br></pre></td></tr></table></figure>
 <p>우선 과제를 하기에 앞서 make check 했을 때, pintos가 잘 돌아가는지, 잘 돌아가는 시점이 git에 기록되어 있어 언제든 그 상태로 돌아갈 수 있는지 부터 확인해야 한다. git을 아직 안만들었다면 github에서 repository를 만들고 처음상태 핀토스를 commit 하자. 그리고 과제 중간중간에도 뭔가를 바꿨는데 잘 돌아간다면 항상 commit을 해서 언제든 그 상태로 돌아갈 수 있게 하는 습관을 들이는 것이 좋다. 돌아갈 곳이 있다는 것이 얼마나 좋은 것인지 과제를 하다보면 느끼게 될 것이다.</p>
 <p>또, interrupt와 synchronization에 대한 설명은 핀토스 다큐먼트에 잘 묘사되어 있으니 꼭 appendix에서 해당 주제를 이해해야 한다. 이 것을 이해하게 되면 핀토스가 어떻게 돌아가는 지 이해하는 데에 큰 도움이 된다. 그리고 lib/kernel 에 보면 우리가 자유롭게 사용할 수 있는 유용한 자료구조 및 함수가 구현되어 있다. 특히 list.c, list.h는 앞으로 핀토스 과제를 하며 계속 사용하게 될 자료구조 이므로 사용법을 반드시 익혀야 한다. 주석에 list creation, list iteration 등에 대한 설명이 매우 잘 되있으므로 참고하면 된다.</p>
+<p>참고로 1번 프로젝트와 2,3,4 프로젝트는 완전히 별개로 진행된다. 2번 프로젝트부터는 3번, 4번 프로젝트와 계속 이어진다.</p>
 <h2 id="alarm-clock-시도해보기"><a href="#alarm-clock-시도해보기" class="headerlink" title="alarm clock 시도해보기"></a>alarm clock 시도해보기</h2><p>핀토스 첫번째 과제의 첫번째 task인 alarm clock이다. 본격적인 과제에 앞서 몸풀기 격인 task이다. 다큐먼트에 어쩌고 저쩌고 굉장히 간단한 것처럼 써져있지만, 사실 처음 핀토스를 시작한 입장에서 다큐먼트의 글을 읽으며 “뭔지 대충은 알겠는데, 그래서 뭐하라는거야?” 라는 생각이 들 것이라 생각한다. 문제 상황이 무엇인지 부터 정확히 파악해보자.</p>
 <p>여기서 문제는 devices/timer.c 에 있는 timer_sleep() 함수가 busy-wait 방식으로 구현되어 있다는 것이다. alarm clock의 task는 timer_sleep()이 busy-wait을 하지 않도록 하는 것이다. busy-wait은 의미없는 명령을 실행하며 일정 시점이 지나기를 기다리는 행동을 의미하는데, 지금 구현은 반복문을 돌며, 일정 시간이 지나지 않았다면 thread_yield()를 통해 다음 thread에게 실행 권한을 넘기는 것을 반복한다. 즉, busy-wait으로 구현이 되어있다. 문제에서 요구하는 것은 반복문을 통해 계속 시간을 확인하지 않으면서(while을 없애라는 것이다), ticks 만큼의 시간이 지났을 때 thread가 실행 되도록 하는 것이다. </p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// busy-wait 으로 구현된 timer_sleep()</span></span><br><span class="line"><span class="keyword">while</span> (timer_elapsed (start) &lt; ticks) </span><br><span class="line">    thread_yield ();</span><br></pre></td></tr></table></figure>
@@ -503,9 +504,51 @@
 <p>왜 stack pointer가 바뀌면 실행환경이 바뀌었다고 생각할 수 있는지 상상해보자. 잘 생각해 보면 모든 thread가 schedule()에서 시작하고, schedule()에서 종료되므로, stack pointer를 바꿔줌으로써 다른 thread를 실행하고 있다고 생각할 수 있다는 것을 알 수 있을 것이다.</p>
 <p>또 한가지 눈여겨 볼만한 것은 thread는 context switch를 할 때, “interrupt에서 빠져나온 것 처럼” 행동한다는 것이다. 위에 thread_create()에서 alloc_frame()을 포함한 “이걸 왜하는 거지?” 하는 생각이 들었던 코드가 바로 kernel_thread() 함수에서 interrupt가 걸렸던 것 처럼 fake stack frame을 쌓는 과정이라고 생각하면 될 것 같다(처음 만들어진 thread의 stack에는 아무것도 없으므로).</p>
 <p>이 모든 마법같은 일들이 threads/switch.S에 어셈블리코드로 작성되어 있다. 해석하기가 그리 어렵지는 않으므로 context switch의 메커니즘이 이해가 간다면, 한 번 살펴보는 것도 괜찮은 공부가 될 것 같다.</p>
-<h2 id="synchronization-이해하기"><a href="#synchronization-이해하기" class="headerlink" title="synchronization 이해하기"></a>synchronization 이해하기</h2><p>threads/synch.h, threads/synch.c 에 핀토스에서 사용할 수 있는 3가지 synchronization 메커니즘인 <strong>semaphore, lock, condition variable</strong>이 구현되어 있다. 평소에 여러 개의 실행흐름을 가지고 있는 parallel 프로그래밍에대한 경험이 없다면, synchronization이 뭐고, 왜 필요한지에 대한 의문이 있을 것이라 생각한다. 예시를 통해 알아보자.</p>
-<h3 id="semaphore"><a href="#semaphore" class="headerlink" title="semaphore"></a>semaphore</h3><p>thread A, B 가 동시에 실행되고 있는 상황을 생각해보자. </p>
-<h3 id="lock"><a href="#lock" class="headerlink" title="lock"></a>lock</h3><h3 id="condition-variable"><a href="#condition-variable" class="headerlink" title="condition variable"></a>condition variable</h3><h2 id="priority-scheduling-해결하기"><a href="#priority-scheduling-해결하기" class="headerlink" title="priority scheduling 해결하기"></a>priority scheduling 해결하기</h2>
+<h2 id="priority-scheduling-해결하기"><a href="#priority-scheduling-해결하기" class="headerlink" title="priority scheduling 해결하기"></a>priority scheduling 해결하기</h2><h3 id="문제"><a href="#문제" class="headerlink" title="문제"></a>문제</h3><ul>
+<li>priority scheduling<ul>
+<li>struct thread에 보면 priority 라는 항목이 있다. block되지 않은 thread 중 가장 높은 priority를 가진 thread가 CPU를 차지하도록 만들면 된다.</li>
+</ul>
+</li>
+<li>priority inversion problem<ul>
+<li>낮은 priority를 가진 thread가 어떤 자원을 차지하고 있어서, 높은 priority를 가진 thread가 실행되지 못하고 있는 상황이다.</li>
+<li>각각의 priority가 0, 30, 60 인 thread A,B,C 가 있고, A가 lock을 acquire 한 상황을 생각해보자. priority scheduling에 의하면 C가 CPU를 차지하게 된다. 그런데 C가 실행 도중 A가 가진 lock을 필요로 한다면, A가 아직 lock을 release하지 않았으므로, C가 block 이 되는데, priority scheduling에 의해 B가 CPU를 계속 차지하므로 C는 계속 block 상태에 놓이게 된다. 이 것은 우리가 원하는 상황이 아니다.</li>
+<li>B를 계속 실행하는 것이 아니라, A의 priority를 높여서 A가 lock release를 하게 만든 다음 A의 priority를 다시 낮추고, C를 unblock 시켜 CPU를 차지하게 하는 것이 조금 더 나은 정책이다. 이렇게 C로 인해 A의 priority가 높아지는 상황을 <strong>priority donation</strong>이라고 하고, 이 것을 구현해야 한다. 다행히 lock에 대해서만 구현하면 된다고 한다.</li>
+</ul>
+</li>
+</ul>
+<h3 id="현재-핀토스-분석"><a href="#현재-핀토스-분석" class="headerlink" title="현재 핀토스 분석"></a>현재 핀토스 분석</h3><ul>
+<li>위에 scheduling에서 보았듯이 현재 핀토스는 round-robin scheduling을 채택하고 있다</li>
+</ul>
+<h3 id="구현-디자인"><a href="#구현-디자인" class="headerlink" title="구현 디자인"></a>구현 디자인</h3><p>어디를 손봐야 할지부터 생각해 보자. tests/threads 폴더에 있는 여러 test case들을 보며 이 코드가 어떻게 실행되어야 되는지 부터 생각하면 구현할 내용이 훨씬 명확해 진다. 또, 핀토스 코드와 함께 제출해야 되는 pintos design document의 질문들을 보는 것도 구현 디자인에 큰 도움이 된다. 꼭꼭 test-case에 있는 코드가 어떻게 동작할 지 분석하고, 그 다음 어떻게 구현할지를 생각해야 한다.</p>
+<p>생각할 거리가 있는 test case 몇 개를 뽑아보았다(사실 거의 전부이다).</p>
+<ul>
+<li>priority-donate-multiple<ul>
+<li>priority가 30인 thread A가 lock a,b를 얻고, 각각 priority가 31,32인 thread B,C를 차례대로 생성하는데, thread B,C는 각각 lock a,b를 필요로 한다.</li>
+<li>priority donation에 의해 A의 priority는 30 -&gt; 31 -&gt; 32 가 되고, A가 lock b,a 순으로 release하면 C,B 순서로 thread 가 실행된 후, A의 priority는 다시 32 -&gt; 31 -&gt; 30이 되어야 함.</li>
+</ul>
+</li>
+<li>priority-sema</li>
+<li>priority-condvar</li>
+<li>priority-fifo</li>
+<li>priority-donate-chain</li>
+<li>priority-donate-nest</li>
+<li>priority-donate-sema</li>
+</ul>
+<p>priority의 변화가 언제 일어나고, 어떻게 thread를 ready_list에 넣고 뺄 것인지, 각각의 cond_var, semaphore에 들어있는 waiter_list를 어떻게 관리해야 할지, priority donation이 끝나고 어떻게 원래의 priority를 회복해야 할 지 생각해야 된다.</p>
+<p><strong>ready_list에 어떻게 넣고 뺄 것인가?</strong></p>
+<ol>
+<li>넣을 때 : ready_list가 priority의 내림차순으로 정렬되게 넣음</li>
+<li>뺄 때 : ready_list의 맨 앞에서 꺼냄</li>
+</ol>
+<p><strong>priority의 변화는 언제 일어날까?</strong></p>
+<ol>
+<li>thread_create()를 통해 새로운 thread가 만들어 질 때</li>
+<li>thread_set_priority()를 통해 현재 thread의 priority가 바뀔 때</li>
+<li>thread_unblock()이 될 때</li>
+<li>sema_up(), sema_down(), cond_wait(), cond_singal(), lock_acquire(), lock_release() 할 때 </li>
+</ol>
+<p>나는 struct thread에 thread가 가지고 있는 lock의 list 항목을 추가하고, struct lock에 holder의 원래 priority를 추가로 기록하는 방법으로 해결했다.</p>
+
           
         
       
